@@ -10,7 +10,7 @@ export default function Dashboard() {
   
         <div className="balance-dashboard">
           <h1>Current Balance: 100.00</h1>
-          <h2>Last transaction date: {"mm/dd/yy"}</h2>
+          <h2>Last transaction date: mm/dd/yy</h2>
         </div>
       </div>
     );

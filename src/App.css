@@ -1,3 +1,52 @@
 body {
-  background-color: grey;
+  margin: 0;
+  overflow: hidden;
+  padding: 0;
+  background: rgb(3, 3, 37);
+  background: linear-gradient(
+    90deg,
+    rgba(3, 3, 37, 1) 5%,
+    rgba(58, 58, 66, 1) 100%,
+    rgba(113, 113, 131, 1) 100%
+  );
+  padding-top: 5vh;
+}
+
+.dashboard {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  text-align: center;
+  justify-content: flex-start;
+  padding-top: 20px;
+}
+
+.menu {
+  display: flex;
+  justify-content: space-around;
+  gap: 10vw;
+  width: 100vw;
+  box-sizing: border-box;
+  position: relative;
+  margin-bottom: 15vh;
+  /* border: 45vh; */
+  cursor: pointer;
+}
+
+.balance-dashboard {
+  height: 26vh;
+  background: rgb(58, 58, 66);
+  background: linear-gradient(
+    90deg,
+    rgba(58, 58, 66, 1) 0%,
+    rgba(113, 113, 131, 1) 0%,
+    rgba(48, 41, 50, 1) 95%
+  );
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  text-align: center;
+  margin-left: 10vw;
+  margin-right: 10vw;
+  border-radius: 33px;
 }

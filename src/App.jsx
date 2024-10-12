@@ -5,12 +5,11 @@ import { ProtectedRoute } from "./pages/components/protectedRoutes";
 
 import { Home } from "./pages/home";
 import { Private } from "./pages/private";
-import Dashboard from "./pages/dashboard";
+import Dashboard from "./pages/Dashboard";
 
 import "./App.css";
 import { useEffect, useState } from "react";
 import { auth } from "./pages/firebase";
-import Dashboard from "./pages/dashboard";
 
 function App() {
   const [user, setUser] = useState(null);
@@ -41,9 +40,9 @@ function App() {
           path="/private"
           element={
             <ProtectedRoute user={user}>
-              {/* <Private></Private> */}
-              <Dashboard></Dashboard>
+              <Dashboard/>
             </ProtectedRoute>
+            
           }
         ></Route>
       </Routes>
