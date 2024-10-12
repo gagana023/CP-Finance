@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { Navigate } from "react-router-dom";
+import TextField from '@mui/material/TextField';
+
 
 import { auth } from "./firebase";
 
@@ -61,6 +63,7 @@ export const Home = ({ user }) => {
           <ul>
             <li>
               <label htmlFor="email">Email</label>
+              <TextField id="outlined-basic" label="Outlined" variant="outlined" />
               <input type="text" id="email" onChange={handleEmailChange} />
             </li>
             <li>
