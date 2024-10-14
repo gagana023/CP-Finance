@@ -1,10 +1,16 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 import { onAuthStateChanged } from "firebase/auth";
-import { ProtectedRoute } from "./pages/components/protectedRoutes";
+import { ProtectedRoute } from "./components/protectedRoutes";
 
 import { Home } from "./pages/home";
+import Login  from "./pages/Login";
+import Signup  from "./pages/Signup";
+import Dashboard  from "./pages/Dashboard";
 import { Private } from "./pages/private";
+import { ThemeProvider } from '@mui/material/styles';
+import { theme } from './theme';
+import { StyledEngineProvider } from '@mui/material';
 
 import "./App.css";
 import { useEffect, useState } from "react";
@@ -32,19 +38,26 @@ function App() {
   }
 
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route index path="/" element={<Home user={user}></Home>}></Route>
-        <Route
-          path="/private"
-          element={
-            <ProtectedRoute user={user}>
-              <Private></Private>
-            </ProtectedRoute>
-          }
-        ></Route>
-      </Routes>
-    </BrowserRouter>
+    <StyledEngineProvider injectFirst>
+      <ThemeProvider theme={theme}>
+        <BrowserRouter>
+          <Routes>
+            <Route index path="/" element={<Home user={user}></Home>}></Route>
+            <Route
+              path="/private"
+              element={
+                <ProtectedRoute user={user}>
+                  <Private></Private>
+                </ProtectedRoute>
+              }
+            ></Route>
+            <Route  path="/login" element={<Login />}></Route>
+            <Route  path="/signup" element={<Signup />}></Route>
+            <Route  path="/dashboard" element={<Dashboard />}></Route>
+          </Routes>
+        </BrowserRouter>
+    </ThemeProvider>
+    </StyledEngineProvider>
   );
 }
 
