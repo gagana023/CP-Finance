@@ -46,14 +46,14 @@ function App() {
             <Route
               path="/private"
               element={
-                <ProtectedRoute user={user}>
+                <ProtectedRoute user={user} isPrivate={true}>
                   <Private></Private>
                 </ProtectedRoute>
               }
             ></Route>
-            <Route  path="/login" element={<Login />}></Route>
-            <Route  path="/signup" element={<Signup />}></Route>
-            <Route  path="/dashboard" element={<Dashboard />}></Route>
+            <Route  path="/login" element={<ProtectedRoute user={user} isPrivate={false}><Login /></ProtectedRoute>}></Route>
+            <Route  path="/signup" element={<ProtectedRoute user={user} isPrivate={false}><Signup /></ProtectedRoute>}></Route>
+            <Route  path="/dashboard" element={<ProtectedRoute user={user} isPrivate={false}><Dashboard /></ProtectedRoute>}></Route>
           </Routes>
         </BrowserRouter>
     </ThemeProvider>
