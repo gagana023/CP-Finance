@@ -7,6 +7,8 @@ import { Home } from "./pages/home";
 import Login  from "./pages/Login";
 import Signup  from "./pages/Signup";
 import Dashboard  from "./pages/Dashboard";
+import Transaction from './pages/Transaction';
+import Account from './pages/Account';
 import { Private } from "./pages/private";
 import { ThemeProvider } from '@mui/material/styles';
 import { theme } from './theme';
@@ -21,6 +23,7 @@ function App() {
   const [isFetching, setIsFetching] = useState(true);
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
+      console.log('user11',user)
       if (user) {
         setUser(user);
         setIsFetching(false);
@@ -42,18 +45,20 @@ function App() {
       <ThemeProvider theme={theme}>
         <BrowserRouter>
           <Routes>
-            <Route index path="/" element={<Home user={user}></Home>}></Route>
-            <Route
+            {/* <Route
               path="/private"
               element={
                 <ProtectedRoute user={user} isPrivate={true}>
                   <Private></Private>
                 </ProtectedRoute>
               }
-            ></Route>
+            ></Route> */}
             <Route  path="/login" element={<ProtectedRoute user={user} isPrivate={false}><Login /></ProtectedRoute>}></Route>
             <Route  path="/signup" element={<ProtectedRoute user={user} isPrivate={false}><Signup /></ProtectedRoute>}></Route>
-            <Route  path="/dashboard" element={<ProtectedRoute user={user} isPrivate={false}><Dashboard /></ProtectedRoute>}></Route>
+            <Route  path="/dashboard" element={<ProtectedRoute user={user} isPrivate={true}><Dashboard /></ProtectedRoute>}></Route>
+            <Route  path="/account" element={<ProtectedRoute user={user} isPrivate={true}><Account /></ProtectedRoute>}></Route>
+            <Route  path="/transaction" element={<ProtectedRoute user={user} isPrivate={true}><Transaction /></ProtectedRoute>}></Route>
+            <Route index path="*" element={<ProtectedRoute user={user} isPrivate={true}><Dashboard user={user}></Dashboard></ProtectedRoute>}></Route>
           </Routes>
         </BrowserRouter>
     </ThemeProvider>

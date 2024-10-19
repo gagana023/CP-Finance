@@ -13,16 +13,13 @@ import Typography from '@mui/material/Typography';
 import Stack from '@mui/material/Stack';
 import MuiCard from '@mui/material/Card';
 import { styled } from '@mui/material/styles';
-//import ForgotPassword from './ForgotPassword';
-//import AppTheme from '../shared-theme/AppTheme';
-//import ColorModeSelect from '../shared-theme/ColorModeSelect';
 
 const Card = styled(MuiCard)(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
   alignSelf: 'center',
   width: '100%',
-  margin:'auto',
+  margin: 'auto',
   padding: theme.spacing(4),
   gap: theme.spacing(2),
   [theme.breakpoints.up('sm')]: {
@@ -64,6 +61,8 @@ export default function Signup(props) {
   const [emailErrorMessage, setEmailErrorMessage] = React.useState('');
   const [passwordError, setPasswordError] = React.useState(false);
   const [passwordErrorMessage, setPasswordErrorMessage] = React.useState('');
+  const [confirmPasswordError, setConfirmPasswordError] = React.useState(false);
+  const [confirmPasswordErrorMessage, setConfirmPasswordErrorMessage] = React.useState('');
   const [open, setOpen] = React.useState(false);
 
   const handleClickOpen = () => {
@@ -75,10 +74,9 @@ export default function Signup(props) {
   };
 
   const handleSubmit = (event) => {
-    if (emailError || passwordError) {
-      event.preventDefault();
-      return;
-    }
+    event.preventDefault(); // Prevent default form submission
+    if (!validateInputs()) return; // Validate inputs
+
     const data = new FormData(event.currentTarget);
     console.log({
       email: data.get('email'),
@@ -89,9 +87,11 @@ export default function Signup(props) {
   const validateInputs = () => {
     const email = document.getElementById('email');
     const password = document.getElementById('password');
+    const confirmPassword = document.getElementById('confirmPassword');
 
     let isValid = true;
 
+    // Email validation
     if (!email.value || !/\S+@\S+\.\S+/.test(email.value)) {
       setEmailError(true);
       setEmailErrorMessage('Please enter a valid email address.');
@@ -101,6 +101,7 @@ export default function Signup(props) {
       setEmailErrorMessage('');
     }
 
+    // Password validation
     if (!password.value || password.value.length < 6) {
       setPasswordError(true);
       setPasswordErrorMessage('Password must be at least 6 characters long.');
@@ -110,94 +111,120 @@ export default function Signup(props) {
       setPasswordErrorMessage('');
     }
 
+    // Confirm Password validation
+    if (confirmPassword.value !== password.value) {
+      setConfirmPasswordError(true);
+      setConfirmPasswordErrorMessage('Passwords do not match.');
+      isValid = false;
+    } else {
+      setConfirmPasswordError(false);
+      setConfirmPasswordErrorMessage('');
+    }
+
     return isValid;
   };
 
   return (
-      <SignInContainer direction="column" justifyContent="space-between">
-       <Card variant="outlined">
-          <Typography
-            component="h1"
-            variant="h4"
-            sx={{ width: '100%', fontSize: 'clamp(2rem, 10vw, 2.15rem)' }}
-          >
-            Sign up
-          </Typography>
-           <Box
-            component="form"
-            onSubmit={handleSubmit}
-            noValidate
-            sx={{
-              display: 'flex',
-              flexDirection: 'column',
-              width: '100%',
-              gap: 2,
-            }}
-          >
-            <FormControl>
-              <FormLabel htmlFor="email">Email</FormLabel>
-              <TextField
-                error={emailError}
-                helperText={emailErrorMessage}
-                id="email"
-                type="email"
-                name="email"
-                placeholder="your@email.com"
-                autoComplete="email"
-                autoFocus
-                required
-                fullWidth
-                variant="outlined"
-                color={emailError ? 'error' : 'primary'}
-                sx={{ ariaLabel: 'email' }}
-              />
-            </FormControl>
-            <FormControl>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                <FormLabel htmlFor="password">Password</FormLabel>
-              </Box>
-             <TextField
-                error={passwordError}
-                helperText={passwordErrorMessage}
-                name="password"
-                placeholder="••••••"
-                type="password"
-                id="password"
-                autoComplete="current-password"
-                autoFocus
-                required
-                fullWidth
-                variant="outlined"
-                color={passwordError ? 'error' : 'primary'}
-              />
-            </FormControl>
-          <FormControlLabel
-              control={<Checkbox value="remember" color="primary" />}
-              label="Remember me"
-              /> 
-            <Button
-              type="submit"
+    <SignInContainer direction="column" justifyContent="space-between">
+      <Card variant="outlined">
+        <Typography
+          component="h1"
+          variant="h4"
+          sx={{ width: '100%', fontSize: 'clamp(2rem, 10vw, 2.15rem)' }}
+        >
+          Sign up
+        </Typography>
+        <Box
+          component="form"
+          onSubmit={handleSubmit}
+          noValidate
+          sx={{
+            display: 'flex',
+            flexDirection: 'column',
+            width: '100%',
+            gap: 2,
+          }}
+        >
+          <FormControl>
+            <FormLabel htmlFor="email">Email</FormLabel>
+            <TextField
+              error={emailError}
+              helperText={emailErrorMessage}
+              id="email"
+              type="email"
+              name="email"
+              placeholder="your@email.com"
+              autoComplete="email"
+              autoFocus
+              required
               fullWidth
-              variant="contained"
-              onClick={validateInputs}
-            >
-              Sign Up
-            </Button>
-              <Typography sx={{ textAlign: 'center' }}>
-                have an account?{' '}
-              <span>
-                <Link
-                  href="/login"
-                  variant="body2"
-                  sx={{ alignSelf: 'center' }}
-                  color="inherit"
-                >
-                  Sign In
-                </Link>
-              </span>
-            </Typography>
-          </Box>
-        </Card> 
-      </SignInContainer>
+              variant="outlined"
+              color={emailError ? 'error' : 'primary'}
+              sx={{ ariaLabel: 'email' }}
+            />
+          </FormControl>
+          <FormControl>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+              <FormLabel htmlFor="password">Password</FormLabel>
+            </Box>
+            <TextField
+              error={passwordError}
+              helperText={passwordErrorMessage}
+              name="password"
+              placeholder="••••••"
+              type="password"
+              id="password"
+              autoComplete="current-password"
+              required
+              fullWidth
+              variant="outlined"
+              color={passwordError ? 'error' : 'primary'}
+            />
+          </FormControl>
+          <FormControl>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+              <FormLabel htmlFor="confirmPassword">Confirm Password</FormLabel>
+            </Box>
+            <TextField
+              error={confirmPasswordError}
+              helperText={confirmPasswordErrorMessage}
+              name="confirmPassword"
+              placeholder="••••••"
+              type="password"
+              id="confirmPassword"
+              required
+              fullWidth
+              variant="outlined"
+              color={confirmPasswordError ? 'error' : 'primary'}
+            />
+          </FormControl>
+          <FormControlLabel
+            control={<Checkbox value="remember" color="primary" />}
+            label="Remember me"
+          />
+          <Button
+            type="submit"
+            fullWidth
+            variant="contained"
+            onClick={validateInputs}
+          >
+            Sign Up
+          </Button>
+          <Typography sx={{ textAlign: 'center' }}>
+            have an account?{' '}
+            <span>
+              <Link
+                href="/login"
+                variant="body2"
+                sx={{ alignSelf: 'center' }}
+                color="inherit"
+              >
+                Sign In
+              </Link>
+            </span>
+          </Typography>
+        </Box>
+      </Card>
+    </SignInContainer>
   );
 }

@@ -1,174 +1,184 @@
-import * as React from 'react';
+import { useEffect, useState } from "react";
+import { Navigate, useNavigate } from "react-router-dom";
+import { auth } from "../firebase"; // Import your firebase configuration
+import {
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+} from "firebase/auth";
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Checkbox from '@mui/material/Checkbox';
-import CssBaseline from '@mui/material/CssBaseline';
-import FormControlLabel from '@mui/material/FormControlLabel';
-import Divider from '@mui/material/Divider';
-import FormLabel from '@mui/material/FormLabel';
 import FormControl from '@mui/material/FormControl';
-import Link from '@mui/material/Link';
+import FormControlLabel from '@mui/material/FormControlLabel';
+import FormLabel from '@mui/material/FormLabel';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import Stack from '@mui/material/Stack';
 import MuiCard from '@mui/material/Card';
 import { styled } from '@mui/material/styles';
-//import ForgotPassword from './ForgotPassword';
-//import AppTheme from '../shared-theme/AppTheme';
-//import ColorModeSelect from '../shared-theme/ColorModeSelect';
-import SignInContainer, { Card } from './StyledLogin';
 
+const Card = styled(MuiCard)(({ theme }) => ({
+  display: 'flex',
+  flexDirection: 'column',
+  alignSelf: 'center',
+  width: '100%',
+  margin: 'auto',
+  padding: theme.spacing(4),
+  gap: theme.spacing(2),
+  [theme.breakpoints.up('sm')]: {
+    maxWidth: '450px',
+  },
+}));
 
-export default function Login(props) {
-  const [emailError, setEmailError] = React.useState(false);
-  const [emailErrorMessage, setEmailErrorMessage] = React.useState('');
-  const [passwordError, setPasswordError] = React.useState(false);
-  const [passwordErrorMessage, setPasswordErrorMessage] = React.useState('');
-  const [open, setOpen] = React.useState(false);
+const SignInContainer = styled(Stack)(({ theme }) => ({
+  minHeight: '100%',
+  padding: theme.spacing(2),
+}));
 
-  const handleClickOpen = () => {
-    setOpen(true);
+export const Login = ({ user }) => {
+  const navigate = useNavigate();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState(""); // New state for confirm password
+  const [isSignUpActive, setIsSignUpActive] = useState(false);
+  const [emailError, setEmailError] = useState(false);
+  const [passwordError, setPasswordError] = useState(false);
+  const [confirmPasswordError, setConfirmPasswordError] = useState(false); // Error state for confirm password
+
+  const handleMethodChange = () => {
+    setIsSignUpActive(!isSignUpActive);
   };
 
-  const handleClose = () => {
-    setOpen(false);
-  };
-
-  const handleSubmit = (event) => {
-    if (emailError || passwordError) {
-      event.preventDefault();
+  const handleSignUp = () => {
+    if (!email || !password || !confirmPassword) {
+      setEmailError(!email);
+      setPasswordError(!password);
+      setConfirmPasswordError(!confirmPassword);
       return;
     }
-    const data = new FormData(event.currentTarget);
-    console.log({
-      email: data.get('email'),
-      password: data.get('password'),
-    });
+    if (password !== confirmPassword) { // Validate if passwords match
+      setConfirmPasswordError(true);
+      return;
+    }
+    
+    createUserWithEmailAndPassword(auth, email, password)
+      .then((userCredential) => {
+        const user = userCredential.user;
+        console.log("User registered:", user);
+      })
+      .catch((error) => {
+        const errorCode = error.code;
+        const errorMessage = error.message;
+        console.error("Sign Up Error:", errorCode, errorMessage);
+      });
   };
 
-  const validateInputs = () => {
-    const email = document.getElementById('email');
-    const password = document.getElementById('password');
-
-    let isValid = true;
-
-    if (!email.value || !/\S+@\S+\.\S+/.test(email.value)) {
-      setEmailError(true);
-      setEmailErrorMessage('Please enter a valid email address.');
-      isValid = false;
-    } else {
-      setEmailError(false);
-      setEmailErrorMessage('');
+  const handleSignIn = () => {
+    if (!email || !password) {
+      setEmailError(!email);
+      setPasswordError(!password);
+      return;
     }
+    signInWithEmailAndPassword(auth, email, password)
+      .then((userCredential) => {
+        const user = userCredential.user;
+        console.log("User signed in:", user);
+        navigate('/')
 
-    if (!password.value || password.value.length < 6) {
-      setPasswordError(true);
-      setPasswordErrorMessage('Password must be at least 6 characters long.');
-      isValid = false;
-    } else {
-      setPasswordError(false);
-      setPasswordErrorMessage('');
-    }
-
-    return isValid;
+      })
+      .catch((error) => {
+        const errorCode = error.code;
+        const errorMessage = error.message;
+        console.error("Sign In Error:", errorCode, errorMessage);
+      });
   };
+
+  const handleEmailChange = (event) => setEmail(event.target.value);
+  const handlePasswordChange = (event) => setPassword(event.target.value);
+  const handleConfirmPasswordChange = (event) => setConfirmPassword(event.target.value); // Handle confirm password change
 
   return (
-      <SignInContainer direction="column" justifyContent="space-between">
-       <Card variant="outlined">
-          <Typography
-            component="h1"
-            variant="h4"
-            sx={{ width: '100%', fontSize: 'clamp(2rem, 10vw, 2.15rem)' }}
-          >
-            Sign in
-          </Typography>
-           <Box
-            component="form"
-            onSubmit={handleSubmit}
-            noValidate
-            sx={{
-              display: 'flex',
-              flexDirection: 'column',
-              width: '100%',
-              gap: 2,
-            }}
-          >
-            <FormControl>
-              <FormLabel htmlFor="email">Email</FormLabel>
-              <TextField
-                error={emailError}
-                helperText={emailErrorMessage}
-                id="email"
-                type="email"
-                name="email"
-                placeholder="your@email.com"
-                autoComplete="email"
-                autoFocus
-                required
-                fullWidth
-                variant="outlined"
-                color={emailError ? 'error' : 'primary'}
-                sx={{ ariaLabel: 'email' }}
-              />
-            </FormControl>
-            <FormControl>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                <FormLabel htmlFor="password">Password</FormLabel>
-                
-              </Box>
-             <TextField
-                error={passwordError}
-                helperText={passwordErrorMessage}
-                name="password"
-                placeholder="••••••"
-                type="password"
-                id="password"
-                autoComplete="current-password"
-                autoFocus
-                required
-                fullWidth
-                variant="outlined"
-                color={passwordError ? 'error' : 'primary'}
-              />
-            </FormControl>
-          <FormControlLabel
-              control={<Checkbox value="remember" color="primary" />}
-              label="Remember me"
-              /> 
-              
-            <Button
-              type="submit"
+    <SignInContainer direction="column" justifyContent="center">
+      <Card variant="outlined">
+        <Typography component="h1" variant="h4" align="center">
+          {isSignUpActive ? "Sign Up" : "Log In"}
+        </Typography>
+        <Box
+          component="form"
+          onSubmit={(e) => e.preventDefault()}
+          sx={{
+            display: 'flex',
+            flexDirection: 'column',
+            width: '100%',
+            gap: 2,
+          }}
+        >
+          <FormControl>
+            <FormLabel htmlFor="email">Email</FormLabel>
+            <TextField
+              error={emailError}
+              helperText={emailError ? 'Please enter a valid email.' : ''}
+              id="email"
+              type="email"
+              onChange={handleEmailChange}
+              required
               fullWidth
-              variant="contained"
-              onClick={validateInputs}
+              variant="outlined"
+            />
+          </FormControl>
+          <FormControl>
+            <FormLabel htmlFor="password">Password</FormLabel>
+            <TextField
+              error={passwordError}
+              helperText={passwordError ? 'Password is required.' : ''}
+              id="password"
+              type="password"
+              onChange={handlePasswordChange}
+              required
+              fullWidth
+              variant="outlined"
+            />
+          </FormControl>
+          {isSignUpActive && ( // Show confirm password field only during signup
+            <FormControl>
+              <FormLabel htmlFor="confirm-password">Confirm Password</FormLabel>
+              <TextField
+                error={confirmPasswordError}
+                helperText={confirmPasswordError ? 'Passwords must match.' : ''}
+                id="confirm-password"
+                type="password"
+                onChange={handleConfirmPasswordChange}
+                required
+                fullWidth
+                variant="outlined"
+              />
+            </FormControl>
+          )}
+          <FormControlLabel
+            control={<Checkbox value="remember" color="primary" />}
+            label="Remember me"
+          />
+          <Button
+            type="button"
+            fullWidth
+            variant="contained"
+            onClick={isSignUpActive ? handleSignUp : handleSignIn}
+          >
+            {isSignUpActive ? "Sign Up" : "Log In"}
+          </Button>
+          <Typography sx={{ textAlign: 'center' }}>
+            {isSignUpActive ? "Have an account?" : "Don't have an account?"}{" "}
+            <span
+              style={{ cursor: 'pointer', color: 'blue' }}
+              onClick={handleMethodChange}
             >
-              Sign in
-            </Button>
-            <Link
-                  component="button"
-                  type="button"
-                  onClick={handleClickOpen}
-                  variant="body2"
-                  sx={{ alignSelf: 'baseline' }}
-                >
-                  Forgot your password?
-                </Link>
-              <Typography sx={{ textAlign: 'center' }}>
-              Don&apos;t have an account?{' '}
-              <span>
-                <Link
-                  href="/signup"
-                  variant="body2"
-                  sx={{ alignSelf: 'center' }}
-                  color="inherit"
-                >
-                  Sign up
-                </Link>
-              </span>
-            </Typography>
-          </Box>
-        </Card> 
-      </SignInContainer>
+              {isSignUpActive ? "Login" : "Create an Account"}
+            </span>
+          </Typography>
+        </Box>
+      </Card>
+    </SignInContainer>
   );
-}
+};
+
+export default Login;

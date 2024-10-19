@@ -1,19 +1,3 @@
-// import { Navigate } from "react-router-dom";
-// import Link from '@mui/material/Link';
-// export const Header = ({ }) => {
-//     return <div>header
-//         <Link
-//             href="/login"
-//             variant="body2"
-//             sx={{ alignSelf: 'center' }}
-//             color="inherit"
-//         >
-//             Logout
-//         </Link>
-//     </div>;
-// };
-
-
 import * as React from 'react';
 import { useNavigate } from 'react-router-dom';
 import AppBar from '@mui/material/AppBar';
@@ -29,9 +13,12 @@ import Button from '@mui/material/Button';
 import Tooltip from '@mui/material/Tooltip';
 import MenuItem from '@mui/material/MenuItem';
 import AdbIcon from '@mui/icons-material/Adb';
+import { auth } from '../../pages/firebase'; // Import your Firebase auth
+import { signOut } from 'firebase/auth'; // Import signOut from Firebase
 
-const pages = ['Dashboard', 'Account', 'transaction'];
-const settings = ['Profile', 'Account', 'Dashboard', 'Logout'];
+
+const pages = [{title:'Dashboard', path: '/dashboard'}, {title:'Account', path: '/account'}, {title:'transaction', path: '/transaction'}];
+const settings = [{title:'Profile', path: ''}, {title:'Account', path: ''}, {title:'Dashboard', path: ''}, {title:'Logout', path: '/login'}];
 
 function Header() {
     const navigate = useNavigate()
@@ -44,22 +31,27 @@ function Header() {
   const handleOpenUserMenu = (event) => {
     setAnchorElUser(event.currentTarget);
   };
-
-  const handleCloseNavMenu = (path) => {
-      console.log('Dashboard',path)
-      if(path == 'Dashboard'){
-        navigate('/dashboard') 
-    }
+  const handleCloseNavMenu = (page) => {
+      console.log('Dashboard',page)
+      navigate(page.path) 
     setAnchorElNav(null);
 
     
   };
 
-  const handleCloseUserMenu = (path = '' ) => {
+  const handleCloseUserMenu = (page = '' ) => {
     setAnchorElUser(null);
+    console.log('page',page)
 
-    if(path === 'Logout'){
-        navigate('/login')
+    if(page.path === '/login'){
+        signOut(auth)
+          .then(() => {
+              // Sign-out successful. Navigate to login.
+              navigate('/login');
+          })
+          .catch((error) => {
+              console.error("Logout Error:", error);
+          });
     }
   };
 
@@ -113,9 +105,9 @@ function Header() {
               onClose={handleCloseNavMenu}
               sx={{ display: { xs: 'block', md: 'none' } }}
             >
-              {pages.map((page) => (
-                <MenuItem key={page} onClick={() => handleCloseNavMenu(page) }>
-                  <Typography sx={{ textAlign: 'center' }}>{page}</Typography>
+              {pages.map((page, index) => (
+                <MenuItem key={index} onClick={() => handleCloseNavMenu(page) }>
+                  <Typography sx={{ textAlign: 'center' }}>{page.title}</Typography>
                 </MenuItem>
               ))}
             </Menu>
@@ -140,13 +132,13 @@ function Header() {
             LOGO
           </Typography>
           <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
-            {pages.map((page) => (
+            {pages.map((page,index) => (
               <Button
-                key={page}
-                onClick={handleCloseNavMenu}
+                key={index}
+                onClick={() => handleCloseNavMenu(page)}
                 sx={{ my: 2, color: 'white', display: 'block' }}
               >
-                {page}
+                {page.title}
               </Button>
             ))}
           </Box>
@@ -172,9 +164,9 @@ function Header() {
               open={Boolean(anchorElUser)}
               onClose={handleCloseUserMenu}
             >
-              {settings.map((setting) => (
-                <MenuItem key={setting} onClick={() => handleCloseUserMenu(setting)}>
-                  <Typography sx={{ textAlign: 'center' }}>{setting}</Typography>
+              {settings.map((setting,index) => (
+                <MenuItem key={index} onClick={() => handleCloseUserMenu(setting)}>
+                  <Typography sx={{ textAlign: 'center' }}>{setting.title}</Typography>
                 </MenuItem>
               ))}
             </Menu>
