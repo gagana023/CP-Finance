@@ -54,7 +54,7 @@ function App() {
               }
             ></Route> */}
             <Route  path="/login" element={<ProtectedRoute user={user} isPrivate={false}><Login /></ProtectedRoute>}></Route>
-            <Route  path="/signup" element={<ProtectedRoute user={user} isPrivate={false}><Signup /></ProtectedRoute>}></Route>
+            {/* <Route  path="/signup" element={<ProtectedRoute user={user} isPrivate={false}><Signup /></ProtectedRoute>}></Route> */}
             <Route  path="/dashboard" element={<ProtectedRoute user={user} isPrivate={true}><Dashboard /></ProtectedRoute>}></Route>
             <Route  path="/account" element={<ProtectedRoute user={user} isPrivate={true}><Account /></ProtectedRoute>}></Route>
             <Route  path="/transaction" element={<ProtectedRoute user={user} isPrivate={true}><Transaction /></ProtectedRoute>}></Route>

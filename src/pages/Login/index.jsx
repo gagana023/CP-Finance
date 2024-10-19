@@ -64,6 +64,7 @@ export const Login = ({ user }) => {
     createUserWithEmailAndPassword(auth, email, password)
       .then((userCredential) => {
         const user = userCredential.user;
+        navigate('/')
         console.log("User registered:", user);
       })
       .catch((error) => {
