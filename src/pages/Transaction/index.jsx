@@ -108,7 +108,7 @@ const Transaction = () => {
 
       {/* Dialog for Transaction Form */}
       <Dialog open={openDialog} onClose={handleCloseDialog}  maxWidth="sm" fullWidth>
-        <DialogTitle>Add Transaction</DialogTitle>
+        <DialogTitle>{selectedTransaction ? 'Edit' : 'Add'} Transaction</DialogTitle>
         <DialogContent>
           <TransactionForm addTransaction={addTransaction} transaction={selectedTransaction} onClose={handleCloseDialog} triggerToast={triggerToast}  />
         </DialogContent>

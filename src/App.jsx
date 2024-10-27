@@ -5,7 +5,6 @@ import { ProtectedRoute } from "./components/protectedRoutes";
 
 import { Home } from "./pages/home";
 import Login  from "./pages/Login";
-import Signup  from "./pages/Signup";
 import Dashboard  from "./pages/Dashboard";
 import Transaction from './pages/Transaction';
 import Account from './pages/Account';
