@@ -71,13 +71,12 @@ function Header() {
     <AppBar position="static">
       <Container maxWidth="xl">
         <Toolbar disableGutters>
-          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+          <Box sx={{ display: 'flex', alignItems: 'center' }} onClick={() => navigate('/')}>
             <Avatar alt="Project Logo" src="https://png.pngtree.com/png-vector/20220611/ourmid/pngtree-paper-expense-report-icon-png-image_4983422.png" sx={{ width: 40, height: 40, mr: 1 }} />
             <Typography
               variant="h6"
               noWrap
               component="a"
-              href="#app-bar-with-responsive-menu"
               sx={{
                 display: { xs: 'none', md: 'flex' },
                 fontFamily: 'monospace',

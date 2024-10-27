@@ -235,11 +235,13 @@ const expenseSuggestions = getExpenseSuggestions();
             Smart Expense Suggestions
           </Typography>
           <Paper elevation={1} sx={{ p: 2 }}>
-            {expenseSuggestions.map(suggestion => (
+            {expenseSuggestions && expenseSuggestions.length ? expenseSuggestions.map(suggestion => (
               <Typography key={suggestion.id} variant="body1" sx={{ mb: 1 }}>
                 - {suggestion.suggestion}
               </Typography>
-            ))}
+            )) :(
+              <Typography variant="body1">No Suggestions available.</Typography>
+            )}
           </Paper>
         </Box>
 
