@@ -4,6 +4,8 @@ import { collection, getDocs, query, where } from 'firebase/firestore'; // Impor
 import { getAuth, onAuthStateChanged } from 'firebase/auth'; // Import Auth methods
 import { db } from '../firebase'; // Adjust the path as needed
 import TransactionChart from '../../components/TransactionChart';  // Import the chart component
+import Summary from '../../components/Summary';  // Import the chart component
+import TransactionCategoryChart from '../../components/TransactionCategoryChart';
 
 const Dashboard = () => {
   const [transactions, setTransactions] = useState([]);
@@ -44,12 +46,45 @@ const Dashboard = () => {
     fetchTransactions();
   }, [user]); // Empty dependency array ensures this runs once
 
+  // Calculate totals for earnings and expenses based on category
+  const calculateCategoryTotals = () => {
+      const totals = transactions.reduce((acc, transaction) => {
+        const { category, amount, type } = transaction; // Assuming type is 'earn' or 'expense'
+  
+        if (!acc[category]) {
+          acc[category] = { earn: 0, expense: 0 };
+        }
+  
+        if (type === 'income') {
+          acc[category].earn += amount;
+        } else if (type === 'expense') {
+          acc[category].expense += amount;
+        }
+  
+        return acc;
+      }, {});
+  
+      return totals;
+    };
+  
+    const categoryTotals = calculateCategoryTotals();
+
   return (
     <Container maxWidth="md" sx={{ my: 4 }}>
+
+      {/* Summary Section */}
+      <Paper elevation={3} sx={{ p: 3, mb: 4 }}>
+        <Summary transactions={transactions} />
+      </Paper>
 
       {/* Chart Section */}
       <Paper elevation={3} sx={{ p: 3, mb: 4 }}>
         <TransactionChart transactions={transactions} />
+      </Paper>
+
+      {/* Chart Section */}
+      <Paper elevation={3} sx={{ p: 3, mb: 4 }}>
+        <TransactionCategoryChart categoryTotals={categoryTotals} />
       </Paper>
 
     </Container>

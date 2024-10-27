@@ -5,14 +5,15 @@ import { getAuth, onAuthStateChanged } from 'firebase/auth'; // Import Auth meth
 import { db } from '../firebase'; // Adjust the path as needed
 import TransactionForm from '../../components/TransactionForm';
 import TransactionList from '../../components/TransactionList';
-import Summary from '../../components/Summary';
-import TransactionChart from '../../components/TransactionChart';  // Import the chart component
 
+import { ToastContainer, toast } from 'react-toastify'; // Import ToastContainer and toast
+import 'react-toastify/dist/ReactToastify.css'; // Import Toastify CSS
 
 const Transaction = () => {
   const [transactions, setTransactions] = useState([]);
   const [openDialog, setOpenDialog] = useState(false);  // State to control dialog visibility
   const [user, setUser] = useState(null); // To hold the logged-in user
+  const [selectedTransaction, setSelectedTransaction] = useState(null);
 
   const auth = getAuth();
   useEffect(() => {
@@ -55,6 +56,7 @@ const Transaction = () => {
   };
 
   const handleOpenDialog = () => {
+    setSelectedTransaction(null)
     setOpenDialog(true);
   };
 
@@ -65,12 +67,32 @@ const Transaction = () => {
     }
   };
 
-  return (
-    <Container maxWidth="md" sx={{ my: 4 }}>
+  // Open dialog for editing
+  const handleEditTransaction = (transaction) => {
+    setSelectedTransaction(transaction);
+    setOpenDialog(true);
+  };
+
+  const triggerToast = (type = '', data) => {
+    switch(type){
+      case 'success':
+        toast.success(data)
+        break;
+      case 'error':
+        toast.error(data)
+        break;
+      default:
+        break;
+    }
+  }
+
+  return (<>
+  
+    <Container maxWidth="md" sx={{ my: 4, backgroundColor: '#e8e4e4', borderRadius: '10px', padding: '10px' }}>
       {/* Header Section */}
       <Box sx={{ mb: 4, textAlign: 'center' }}>
-        <Typography variant="h4" component="h1" gutterBottom>
-          Personal Finance Manager
+        <Typography variant="h4" component="h1" gutterBottom color="textSecondary">
+          Transactions
         </Typography>
         <Typography variant="subtitle1" color="textSecondary">
           Track your income, expenses, and manage your finances efficiently
@@ -88,7 +110,7 @@ const Transaction = () => {
       <Dialog open={openDialog} onClose={handleCloseDialog}  maxWidth="sm" fullWidth>
         <DialogTitle>Add Transaction</DialogTitle>
         <DialogContent>
-          <TransactionForm addTransaction={addTransaction} onClose={handleCloseDialog}  />
+          <TransactionForm addTransaction={addTransaction} transaction={selectedTransaction} onClose={handleCloseDialog} triggerToast={triggerToast}  />
         </DialogContent>
         <DialogActions>
           <Button onClick={handleCloseDialog} color="secondary">
@@ -97,21 +119,17 @@ const Transaction = () => {
         </DialogActions>
       </Dialog>
 
-      {/* Summary Section */}
-      <Paper elevation={3} sx={{ p: 3, mb: 4 }}>
-        <Summary transactions={transactions} />
-      </Paper>
-
-      {/* Chart Section */}
-      <Paper elevation={3} sx={{ p: 3, mb: 4 }}>
-        <TransactionChart transactions={transactions} />
-      </Paper>
 
       {/* Transaction List Section */}
       <Paper elevation={3} sx={{ p: 3 }}>
-        <TransactionList transactions={transactions} />
+        <TransactionList transactions={transactions} handleEditTransaction={handleEditTransaction} />
       </Paper>
+
+       
+
     </Container>
+    <ToastContainer /> {/* Add ToastContainer here */}
+    </>
   );
 };
 

@@ -13,6 +13,7 @@ import {
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import {categories} from '../../helpers/constacts';
 
 const TransactionFilter = ({
   filterType,
@@ -46,13 +47,21 @@ const TransactionFilter = ({
 
         {/* Category Filter */}
         <Grid item xs={12} sm={4}>
-          <TextField
-            label="Category"
-            variant="outlined"
-            fullWidth
-            value={filterCategory}
-            onChange={(e) => setFilterCategory(e.target.value)}
-          />
+          <FormControl fullWidth>
+            <InputLabel>Category</InputLabel>
+            <Select
+              value={filterCategory}
+              onChange={(e) => setFilterCategory(e.target.value)}
+              label="Category"
+            >
+              <MenuItem value="">All</MenuItem>
+              {categories.map((category) => (
+                <MenuItem key={category} value={category}>
+                  {category}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
         </Grid>
 
         {/* Date Range Filter */}

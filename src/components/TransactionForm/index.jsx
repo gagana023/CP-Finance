@@ -1,29 +1,28 @@
 import React, { useState, useEffect } from 'react';
-import { TextField, Select, MenuItem, Button, FormControl, InputLabel, Box } from '@mui/material';
+import { TextField, Select, MenuItem, Button, FormControl, InputLabel, Box, CircularProgress } from '@mui/material';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs from 'dayjs';
-import { db } from '../../pages/firebase'; // Import your firebase config
-import { collection, addDoc } from 'firebase/firestore'; // Import Firestore methods
-import { getAuth, onAuthStateChanged } from 'firebase/auth'; // Import Auth methods
+import { db } from '../../pages/firebase';
+import { collection, addDoc, doc, updateDoc } from 'firebase/firestore';
+import { getAuth, onAuthStateChanged } from 'firebase/auth';
+import {categories} from '../../helpers/constacts';
 
-const TransactionForm = ({onClose}) => {
-  const [type, setType] = useState('income');
-  const [amount, setAmount] = useState('');
-  const [category, setCategory] = useState('');
-  const [date, setDate] = useState(dayjs());
-  const [user, setUser] = useState(null); // To hold the logged-in user
+const TransactionForm = ({ onClose, transaction, triggerToast = ()=> {} }) => {
+  const [type, setType] = useState(transaction?.type || 'income'); // Prefill if transaction exists
+  const [amount, setAmount] = useState(transaction?.amount || '');
+  const [category, setCategory] = useState(transaction?.category || '');
+  const [date, setDate] = useState(transaction ? dayjs(transaction.date) : dayjs());
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(false); // Loading state
 
-  const auth = getAuth(); // Initialize Firebase Authentication
+  const auth = getAuth();
 
   useEffect(() => {
-    // Check the authentication state
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
     });
-
-    // Clean up subscription on unmount
     return () => unsubscribe();
   }, [auth]);
 
@@ -31,29 +30,44 @@ const TransactionForm = ({onClose}) => {
     e.preventDefault();
 
     if (!user) {
-      alert("You must be logged in to add a transaction.");
+      toast.error("You must be logged in to add or edit a transaction."); // Show error toast
       return;
     }
 
-    const transaction = {
+    const transactionData = {
       type,
       amount: parseFloat(amount),
       category,
       date: date.format('YYYY-MM-DD'),
-      userId: user.uid, // Optional: store the user's ID with the transaction
+      userId: user.uid,
     };
 
+    setLoading(true); // Start loading
+
     try {
-      // Add transaction to Firestore
-      await addDoc(collection(db, 'transactions'), transaction);
+      if (transaction) {
+        // If editing, update the transaction in Firestore
+        const transactionDocRef = doc(db, 'transactions', transaction.id);
+        await updateDoc(transactionDocRef, transactionData);
+        triggerToast('success', 'Transaction updated successfully!')
+      } else {
+        // If adding a new transaction
+        await addDoc(collection(db, 'transactions'), transactionData);
+        triggerToast('success', 'Transaction added successfully!')
+      }
+
       // Reset form fields
       setAmount('');
       setCategory('');
       setDate(dayjs());
-      onClose(true)
-      alert('Transaction added successfully!'); // Optional: add success feedback
+      onClose(true); // Close form and refresh list
+     
     } catch (error) {
-      console.error("Error adding transaction: ", error); // Handle error appropriately
+      console.error("Error submitting transaction: ", error);
+      toast.error("Error submitting transaction."); // Show error toast
+      triggerToast('error', 'Error submitting transaction.')
+    } finally {
+      setLoading(false); // Stop loading
     }
   };
 
@@ -77,29 +91,39 @@ const TransactionForm = ({onClose}) => {
         required
       />
 
-      <TextField
-        fullWidth
-        label="Category"
-        value={category}
-        onChange={(e) => setCategory(e.target.value)}
-        margin="normal"
-        required
-      />
+      <FormControl fullWidth margin="normal">
+        <InputLabel>Category</InputLabel>
+        <Select value={category} onChange={(e) => setCategory(e.target.value)} required>
+          {categories.map((cat, index) => (
+            <MenuItem key={index} value={cat}>
+              {cat}
+            </MenuItem>
+          ))}
+        </Select>
+      </FormControl>
 
-      <LocalizationProvider dateAdapter={AdapterDayjs} >
+      <LocalizationProvider dateAdapter={AdapterDayjs}>
         <DatePicker
-            sx={{width: '100%', mt: 2}}
+          sx={{ width: '100%', mt: 2 }}
           label="Date"
           value={date}
-          className="mt-2"
           onChange={(newValue) => setDate(newValue)}
           renderInput={(params) => <TextField {...params} fullWidth margin="normal" required />}
         />
       </LocalizationProvider>
 
-      <Button variant="contained" color="primary" type="submit" fullWidth sx={{ mt: 2 }}>
-        Add Transaction
+      <Button 
+        variant="contained" 
+        color="primary" 
+        type="submit" 
+        fullWidth 
+        sx={{ mt: 2 }}
+        disabled={loading} // Disable button while loading
+      >
+        {loading ? <CircularProgress size={24} /> : (transaction ? 'Update Transaction' : 'Add Transaction')}
       </Button>
+
+      
     </Box>
   );
 };

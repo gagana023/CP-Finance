@@ -8,23 +8,22 @@ import {
   TableRow,
   Paper,
   Typography,
-  Select,
-  MenuItem,
-  TextField,
   Button,
-  FormControl,
-  InputLabel,
 } from '@mui/material';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs from 'dayjs';
-import TransactionFilter from './TransactionFilter'
+import TransactionFilter from './TransactionFilter';
 
-const TransactionList = ({ transactions }) => {
+const TransactionList = ({ transactions, handleEditTransaction = () => {} }) => {
   const [filterType, setFilterType] = useState('');
   const [filterCategory, setFilterCategory] = useState('');
   const [filterDateRange, setFilterDateRange] = useState([null, null]);
+
+  // Sorting states
+  const [sortColumn, setSortColumn] = useState('date'); // default sort by date
+  const [sortOrder, setSortOrder] = useState('desc'); // default ascending order
 
   // Filter transactions based on selected filters
   const filteredTransactions = transactions.filter((transaction) => {
@@ -38,92 +37,78 @@ const TransactionList = ({ transactions }) => {
     return matchesType && matchesCategory && matchesDate;
   });
 
+  // Sort transactions
+  const sortedTransactions = filteredTransactions.sort((a, b) => {
+    const aValue = sortColumn === 'amount' ? parseFloat(a.amount) : a[sortColumn];
+    const bValue = sortColumn === 'amount' ? parseFloat(b.amount) : b[sortColumn];
+
+    if (sortOrder === 'asc') {
+      return aValue > bValue ? 1 : -1;
+    } else {
+      return aValue < bValue ? 1 : -1;
+    }
+  });
+
+  // Handle sort change
+  const handleSort = (column) => {
+    const isAsc = sortColumn === column && sortOrder === 'asc';
+    setSortColumn(column);
+    setSortOrder(isAsc ? 'desc' : 'asc');
+  };
+
   return (
     <div>
       <Typography variant="h6" gutterBottom>
         Transactions
       </Typography>
 
-      {/* Filter Controls */}
-      {/* <div style={{ marginBottom: '16px' }}>
-        <FormControl sx={{ minWidth: 120, marginRight: 2 }}>
-          <InputLabel>Type</InputLabel>
-          <Select value={filterType} onChange={(e) => setFilterType(e.target.value)} label="Type">
-            <MenuItem value="">All</MenuItem>
-            <MenuItem value="income">Income</MenuItem>
-            <MenuItem value="expense">Expense</MenuItem>
-          </Select>
-        </FormControl>
-
-        <TextField
-          label="Category"
-          variant="outlined"
-          size="small"
-          value={filterCategory}
-          onChange={(e) => setFilterCategory(e.target.value)}
-          sx={{ marginRight: 2 }}
-        />
-
-        <LocalizationProvider dateAdapter={AdapterDayjs}>
-          <DatePicker
-            label="From"
-            value={filterDateRange[0]}
-            onChange={(newValue) => setFilterDateRange([newValue, filterDateRange[1]])}
-            renderInput={(params) => <TextField {...params} sx={{ marginRight: 2 }} />}
-          />
-          <DatePicker
-            label="To"
-            value={filterDateRange[1]}
-            onChange={(newValue) => setFilterDateRange([filterDateRange[0], newValue])}
-            renderInput={(params) => <TextField {...params} />}
-          />
-        </LocalizationProvider>
-
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={() => {
-            setFilterType('');
-            setFilterCategory('');
-            setFilterDateRange([null, null]);
-          }}
-          sx={{ marginLeft: 2 }}
-        >
-          Reset
-        </Button>
-      </div> */}
-
-<TransactionFilter
-  filterType={filterType}
-  setFilterType={setFilterType}
-  filterCategory={filterCategory}
-  setFilterCategory={setFilterCategory}
-  filterDateRange={filterDateRange}
-  setFilterDateRange={setFilterDateRange}
-/>
+      <TransactionFilter
+        filterType={filterType}
+        setFilterType={setFilterType}
+        filterCategory={filterCategory}
+        setFilterCategory={setFilterCategory}
+        filterDateRange={filterDateRange}
+        setFilterDateRange={setFilterDateRange}
+      />
 
       {/* Transactions Table */}
       <TableContainer component={Paper}>
         <Table>
           <TableHead>
             <TableRow>
-              <TableCell>Type</TableCell>
-              <TableCell>Amount</TableCell>
-              <TableCell>Category</TableCell>
-              <TableCell>Date</TableCell>
+              <TableCell onClick={() => handleSort('type')} style={{ cursor: 'pointer' }}>
+                Type {sortColumn === 'type' ? (sortOrder === 'asc' ? '🔼' : '🔽') : ''}
+              </TableCell>
+              <TableCell onClick={() => handleSort('amount')} style={{ cursor: 'pointer' }}>
+                Amount {sortColumn === 'amount' ? (sortOrder === 'asc' ? '🔼' : '🔽') : ''}
+              </TableCell>
+              <TableCell onClick={() => handleSort('category')} style={{ cursor: 'pointer' }}>
+                Category {sortColumn === 'category' ? (sortOrder === 'asc' ? '🔼' : '🔽') : ''}
+              </TableCell>
+              <TableCell onClick={() => handleSort('date')} style={{ cursor: 'pointer' }}>
+                Date {sortColumn === 'date' ? (sortOrder === 'asc' ? '🔼' : '🔽') : ''}
+              </TableCell>
+              <TableCell>Edit</TableCell> {/* New Edit column header */}
             </TableRow>
           </TableHead>
           <TableBody>
-            {filteredTransactions.map((transaction, index) => (
+            {sortedTransactions.map((transaction, index) => (
               <TableRow key={index}>
-                <TableCell>
-                  {transaction.type === 'income' ? 'Income' : 'Expense'}
-                </TableCell>
+                <TableCell>{transaction.type === 'income' ? 'Income' : 'Expense'}</TableCell>
                 <TableCell>
                   {transaction.type === 'income' ? '+' : '-'} ${transaction.amount}
                 </TableCell>
                 <TableCell>{transaction.category}</TableCell>
                 <TableCell>{transaction.date}</TableCell>
+                <TableCell>
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={() => handleEditTransaction(transaction)} // Call handleEditTransaction with the current transaction
+                  >
+                    Edit
+                  </Button>
+                </TableCell> {/* Edit button */}
               </TableRow>
             ))}
           </TableBody>
